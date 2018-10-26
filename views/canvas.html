@@ -13,6 +13,9 @@
         var boardSize=400;
         var ctx;
         var sepSize;
+        
+        var socket;
+        
         $(function(){
             
             $('#testCanvas').attr("width",boardSize).attr('height',boardSize);
@@ -63,9 +66,26 @@
           console.log("x: "+x +"y: "+y);
             
         }
+        
+        function connectServer(){
+          console.log("connectServer");
+          socket = io.connect('http://127.0.0.1:3001');
+          var roomName= $("#roomName").val();
+          socket.emit("roomEnter",roomName);
+          
+        }
 	</script>
   </head>
   <body>
-   	<canvas id="testCanvas" width="150" height="150"></canvas>
+    <div>
+      <label>Room</label><input id="roomName" type="text" value="10"/><button onclick="connectServer();">Enter</button>
+    </div>
+    <div>
+      <canvas id="testCanvas" width="150" height="150"></canvas>
+   	<div>
+   	<div>
+      <textarea id="chatView" cols="20" rows="4"></textarea>
+      <input type="text" id="chatInput"><button id="chatSend">send</button>
+   	<div>
   </body>
 </html>
