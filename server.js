@@ -31,6 +31,10 @@ io.on('connection', (socket) => {
     console.log("chatMsg: "+data.msg);
   
   });
+  
+  socket.on('dropStone', (data) => {
+      console.log("dropStone"+"x :"+data.pos.x+" y: "+data.pos.y);
+  });
 
   socket.on('disconnect', () => {
   console.log('user disconnected');
