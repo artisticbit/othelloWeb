@@ -5,24 +5,64 @@
     	<style>
   
     	</style>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-	<script type="text/javascript">
+    <script type="text/javascript">
         console.log("canvas Test");
         
-        var boardSize=800;
-        
+        var boardSize=400;
+        var ctx;
+        var sepSize;
         $(function(){
             
             $('#testCanvas').attr("width",boardSize).attr('height',boardSize);
             
             var canvas = document.getElementById("testCanvas");
-            var ctx = canvas.getContext('2d');
-            
-            ctx.fillStyle="rgb(0,255,0)";
+            ctx = canvas.getContext('2d');
+             
+            sepSize=boardSize/8;
+            drawBoard(ctx,sepSize);
+            canvas.onmousedown = function(event){ boardClickEvt(event)};
+        });
+        
+        function drawBoard(ctx,sepSize){
+            ctx.fillStyle="rgb(150,150,150)";
             ctx.fillRect(0,0,boardSize,boardSize);
             
-        });
+            ctx.strokeStyle="rgb(0,0,0)";
+            ctx.beginPath();
+            for(var i=0;i<8;i++){
+               ctx.moveTo(sepSize*i,0);
+               ctx.lineTo(sepSize*i,boardSize); 
+               ctx.moveTo(0,sepSize*i);
+               ctx.lineTo(boardSize,sepSize*i); 
+            }
+               ctx.closePath();
+               ctx.stroke();
+        }
+        
+        function boardClickEvt(event){
+              ctx.beginPath();
+              ctx.fillStyle="rgb(255,255,255)";
+              ctx.arc(event.x, event.y, 15, 0, Math.PI*2, true);
+              ctx.closePath();
+              ctx.fill();
+              checkPosition(event.x, event.y);
+        }
+        
+        function checkPosition(x,y){
+          var posX,posY;
+          
+          //for(var i=0; i<64; i++){
+              //posX=Math.floor(i/8);
+              //posY=i%8;
+              //console.log("x:"+posX+" y:"+posY);
+          //}
+          x=Math.floor(x/sepSize);
+          y=Math.floor(y/sepSize);
+          console.log("x: "+x +"y: "+y);
+            
+        }
 	</script>
   </head>
   <body>
