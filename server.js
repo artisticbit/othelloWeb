@@ -17,14 +17,18 @@ io.on('connection', (socket) => {
   console.log('a user connected');
   
   socket.on('roomEnter', (msg) => {
-    //io.emit('chat message', msg);
+    
     socket.join(msg);
     console.log("user enter room :: "+msg);
+    
   });
 
-  socket.on('chatMsg', (msg) => {
+  socket.on('chatMsg', (data) => {
     
-    console.log("chatMsg"+msg);
+    io.to(data.roomName).emit('chatMsg',data);
+    console.log("roomName: "+data.roomName);
+    console.log("nickName: "+data.nickName);
+    console.log("chatMsg: "+data.msg);
   
   });
 

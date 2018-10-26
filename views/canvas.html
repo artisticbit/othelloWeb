@@ -15,6 +15,7 @@
         var sepSize;
         
         var socket;
+        var roomName;
         
         $(function(){
             
@@ -70,9 +71,28 @@
         function connectServer(){
           console.log("connectServer");
           socket = io.connect('http://127.0.0.1:3001');
-          var roomName= $("#roomName").val();
+          
+          socket.on("chatMsg", (data) => {
+          
+            console.log(data);
+            
+            var viewVal=$("#chatView").val();
+            var appendMsg=viewVal+"\n"+data.nickName+" : "+data.msg;
+            
+            $("#chatView").val(appendMsg);
+          });
+          
+          roomName= $("#roomName").val();
           socket.emit("roomEnter",roomName);
           
+        }
+        
+        function sendChatMsg(){
+          var nickName=$("#chatNickName").val();
+          var chatMsg=$("#chatInput").val();
+          var data={"roomName":roomName, "nickName":nickName ,"msg":chatMsg};
+              
+          socket.emit("chatMsg",data);
         }
 	</script>
   </head>
@@ -80,12 +100,16 @@
     <div>
       <label>Room</label><input id="roomName" type="text" value="10"/><button onclick="connectServer();">Enter</button>
     </div>
-    <div>
+    <div style="display:none">
       <canvas id="testCanvas" width="150" height="150"></canvas>
+   	</div>
    	<div>
-   	<div>
-      <textarea id="chatView" cols="20" rows="4"></textarea>
-      <input type="text" id="chatInput"><button id="chatSend">send</button>
+      <div>
+        <textarea id="chatView" cols="20" rows="4"></textarea>
+      </div>
+      <input type="text" id="chatNickName"/>
+      <input type="text" id="chatInput"/>
+      <button id="chatSend" onclick="sendChatMsg();">send</button>
    	<div>
   </body>
 </html>
