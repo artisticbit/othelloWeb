@@ -13,25 +13,28 @@ app.engine('html', require('ejs').renderFile);
 //////////////////////////////////////////////////////////
 
 io.on('connection', (socket) => {
-  
+
   console.log('a user connected');
-  
+
   socket.on('roomEnter', (msg) => {
-    
+
     socket.join(msg);
+    var room = io.sockets.adapter.rooms[msg];
+
     console.log("user enter room :: "+msg);
-    
+    console.log("room users Num : "+   room.length);
+
   });
 
   socket.on('chatMsg', (data) => {
-    
+
     io.to(data.roomName).emit('chatMsg',data);
     console.log("roomName: "+data.roomName);
     console.log("nickName: "+data.nickName);
     console.log("chatMsg: "+data.msg);
-  
+
   });
-  
+
   socket.on('dropStone', (data) => {
       console.log("dropStone"+"x :"+data.pos.x+" y: "+data.pos.y);
   });
