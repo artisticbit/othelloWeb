@@ -3,62 +3,71 @@
    	<meta charset="utf-8">
    	<title>Socket</title>
     	<style>
-  
+
     	</style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script type="text/javascript">
         console.log("canvas Test");
-        
+
         var boardSize=400;
         var ctx;
         var sepSize;
-        
+
         var socket;
         var roomName;
-        
+        var myColor;
+        var isMyTurn=false;
+
         $(function(){
-            
+
             $('#testCanvas').attr("width",boardSize).attr('height',boardSize);
-            
+
             var canvas = document.getElementById("testCanvas");
             ctx = canvas.getContext('2d');
-             
+
             sepSize=boardSize/8;
             drawBoard(ctx,sepSize);
             canvas.onmousedown = function(event){ boardClickEvt(event)};
         });
-        
+
         function drawBoard(ctx,sepSize){
             ctx.fillStyle="rgb(150,150,150)";
             ctx.fillRect(0,0,boardSize,boardSize);
-            
+
             ctx.strokeStyle="rgb(0,0,0)";
             ctx.beginPath();
             for(var i=0;i<8;i++){
                ctx.moveTo(sepSize*i,0);
-               ctx.lineTo(sepSize*i,boardSize); 
+               ctx.lineTo(sepSize*i,boardSize);
                ctx.moveTo(0,sepSize*i);
-               ctx.lineTo(boardSize,sepSize*i); 
+               ctx.lineTo(boardSize,sepSize*i);
             }
                ctx.closePath();
                ctx.stroke();
         }
-        
+
         function boardClickEvt(event){
               //ctx.beginPath();
               //ctx.fillStyle="rgb(255,255,255)";
               //ctx.arc(event.x, event.y, 15, 0, Math.PI*2, true);
               //ctx.closePath();
               //ctx.fill();
+            if(isMyTurn){
               var pos=checkPosition(event.x, event.y);
               dropStone(pos);
-              
+            }
         }
-        
+
+        function dropStone(pos){
+          var data={"roomName":roomName,"pos":pos,"dropColor":myColor};
+
+          socket.emit("dropStone",data);
+        }
+
         function checkPosition(x,y){
           var posX,posY;
-          
+
           //for(var i=0; i<64; i++){
               //posX=Math.floor(i/8);
               //posY=i%8;
@@ -67,52 +76,66 @@
           x=Math.floor(x/sepSize);
           y=Math.floor(y/sepSize);
           console.log("x: "+x +"y: "+y);
-         
-          return {"x":x, "y":y}; 
+
+          return {"x":x, "y":y};
         }
-        
+
         function connectServer(){
           console.log("connectServer");
           socket = io.connect('http://127.0.0.1:3001');
-        
+
         /* =====================================================  */
           socket.on("chatMsg", (data) => {
-          
+
             console.log(data);
-            
+
             var chatView=$("#chatView");
             var viewVal=chatView.val();
             var appendMsg=viewVal+"\n"+data.nickName+" : "+data.msg;
-            
+
             $("#chatView").val(appendMsg);
-            
+
             var top=chatView.prop("scrollHeight");
             chatView.scrollTop(top);
-            
+
+          });
+
+          socket.on("roomEnter", (data) => {
+              myColor=data.userColor;
+              $("#myColor").text(myColor);
+              if(data.userColor=="none"){
+                $("#myColor").text("Observer");
+              }
+          });
+
+          socket.on("gameStart", (data) => {
+              if(myColor==data.currentTurn){
+                isMyTurn=true;
+              }
           });
          /* =====================================================  */
-        
+
+
           roomName= $("#roomName").val();
           socket.emit("roomEnter",roomName);
-          
+
         }
-        
+
         function sendChatMsg(){
           var nickName=$("#chatNickName").val();
           var chatMsg=$("#chatInput").val();
           var data={"roomName":roomName, "nickName":nickName ,"msg":chatMsg};
-              
+
           socket.emit("chatMsg",data);
         }
-        
-        function dropStone(pos){
-          var data={"pos":pos};
-          
-          socket.emit("dropStone",data);
-        }
+
+
 	</script>
   </head>
   <body>
+    <div>
+      <span>MY COLOR</span><span id="myColor"></span>
+    </div>
     <div>
       <label>Room</label><input id="roomName" type="text" value="10"/><button onclick="connectServer();">Enter</button>
     </div>
