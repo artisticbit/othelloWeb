@@ -87,10 +87,57 @@ io.on('connection', (socket) => {
   }
 
   fuction searchDropablePos(board){
+    for(var i=0; i<64; i++){
 
+
+    }
 
   }
-  fuction checkBoard(board){
+  fuction dropStoneBoard(board,pos,dropColor){
+
+  }
+
+  fuction checkFullDirection(board,pos,direction,dropStoneColor){
+    var index=0;
+    var flag=false;
+    var currentPos=pos;
+    while(true){
+      switch (direction) {
+        case 0:
+          currentPos.x=currentPos.x+1;
+          break;
+        case 1:
+          currentPos.x=currentPos.x-1;
+          break;
+        case 2:
+          currentPos.y=currentPos.y+1;
+          break;
+        case 3:
+          currentPos.y=currentPos.y-1;
+          break;
+        case 4:
+          currentPos.x=currentPos.x+1;
+          currentPos.y=currentPos.y+1;
+          break;
+        case 5:
+          currentPos.x=currentPos.x-1;
+          currentPos.y=currentPos.y-1;
+          break;
+        case 6:
+          currentPos.x=currentPos.x+1;
+          currentPos.y=currentPos.y-1;
+          break;
+        case 7:
+          currentPos.x=currentPos.x-1;
+          currentPos.y=currentPos.y+1;
+          break;
+      }
+
+      index=currentPos.x+currentPos.y*8;
+      var currentStoneColor=board[index];
+
+
+    }
 
   }
 //////////////////////////////////////////////////////////
