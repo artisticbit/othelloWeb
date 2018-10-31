@@ -101,6 +101,7 @@ io.on('connection', (socket) => {
     var index=0;
     var flag=false;
     var currentPos=pos;
+    var returnData={"flag":false,"indexArr":[]};
     while(true){
       switch (direction) {
         case 0:
@@ -135,6 +136,37 @@ io.on('connection', (socket) => {
 
       index=currentPos.x+currentPos.y*8;
       var currentStoneColor=board[index];
+
+      if(flag==false){ //before find diff color
+
+          if(currentStoneColor==0 || currentStoneColor==dropStoneColor){
+            // disable dropPos
+            returnData.flag=false;
+            return returnData;
+          }
+          else{
+            //index push return array
+
+            //continu search next pos
+            flag=true;
+          }
+
+      }
+
+      else{
+          if(currentStoneColor==0){
+            returnData.flag=false;
+            return returnData;
+          }
+          if(currentStoneColor!=dropStoneColor){
+            //index push retur array
+            returnData.indexArr.push(index);
+          }
+          else{
+            returnData.flag=true;
+            return returnData;
+          }
+      }
 
 
     }
