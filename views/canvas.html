@@ -10,7 +10,7 @@
     <script type="text/javascript">
         console.log("canvas Test");
 
-        var boardSize=400;
+        var boardSize=800;
         var ctx;
         var sepSize;
 
@@ -18,6 +18,16 @@
         var roomName;
         var myColor;
         var isMyTurn=false;
+        var board=[0,0,0,0,0,0,0,0,
+                   0,0,0,0,0,0,0,0,
+                   0,0,0,0,0,0,0,0,
+                   0,0,0,1,2,0,0,0,
+                   0,0,0,2,1,0,0,0,
+                   0,0,0,0,0,0,0,0,
+                   0,0,0,0,0,0,0,0,
+                   0,0,0,0,0,0,0,0];
+        var dropableIndex;
+
 
         $(function(){
 
@@ -35,6 +45,7 @@
             ctx.fillStyle="rgb(150,150,150)";
             ctx.fillRect(0,0,boardSize,boardSize);
 
+            //drawboard
             ctx.strokeStyle="rgb(0,0,0)";
             ctx.beginPath();
             for(var i=0;i<8;i++){
@@ -45,6 +56,40 @@
             }
                ctx.closePath();
                ctx.stroke();
+
+            //drawStones
+            ctx.beginPath();
+            var boardLength=board.length;
+            let stoneColor=0;
+            let drawX,drawY;
+            let radius=sepSize/2;
+            for(var i=0; i<boardLength; i++){
+
+              stoneColor=board[i];
+
+              if(stoneColor==0){
+                continue;
+              }
+
+              drawX=Math.floor(i%8)*sepSize+sepSize/2;
+              drawY=Math.floor(i/8)*sepSize+sepSize/2;
+
+              ctx.beginPath();
+              console.log(stoneColor);
+              if(stoneColor==1){
+                ctx.fillStyle="rgb(255,255,255)";
+              }
+              if(stoneColor==2){
+                ctx.fillStyle="rgb(0,0,0)";
+              }
+
+              ctx.arc(drawX, drawY, radius, 0, Math.PI*2, true);
+              ctx.fill();
+              ctx.closePath();
+
+            }
+
+
         }
 
         function boardClickEvt(event){
@@ -55,7 +100,21 @@
               //ctx.fill();
             if(isMyTurn){
               var pos=checkPosition(event.x, event.y);
-              dropStone(pos);
+              let posIndex=pos.x+pos.y*8;
+              let checkDropable=false;
+
+              for(let i=0; i<dropableIndex.length; i++){
+                if(posIndex==dropableIndex[i]){
+                  checkDropable=true;
+                  break;
+                }
+              }
+              if(checkDropable){
+                dropStone(pos);
+              }
+              else{
+                console.log("index::"+posIndex+"this pos not dropable");
+              }
             }
         }
 
@@ -66,18 +125,19 @@
         }
 
         function checkPosition(x,y){
-          var posX,posY;
+          let posX,posY;
 
           //for(var i=0; i<64; i++){
               //posX=Math.floor(i/8);
               //posY=i%8;
               //console.log("x:"+posX+" y:"+posY);
           //}
-          x=Math.floor(x/sepSize);
-          y=Math.floor(y/sepSize);
-          console.log("x: "+x +"y: "+y);
+          posX=Math.floor(x/sepSize);
+          posY=Math.floor(y/sepSize);
 
-          return {"x":x, "y":y};
+          console.log("eventPos  "+"x: "+x +"y: "+y);
+          console.log("intPos  "+"x: "+posX +"y: "+posY);
+          return {"x":posX, "y":posY};
         }
 
         function connectServer(){
@@ -102,16 +162,28 @@
 
           socket.on("roomEnter", (data) => {
               myColor=data.userColor;
-              $("#myColor").text(myColor);
-              if(data.userColor=="none"){
+
+              if(myColor==1){
+                  $("#myColor").text("White");
+              }
+              if(myColor==2){
+                  $("#myColor").text("Black");
+              }
+
+              if(data.userColor==0){
                 $("#myColor").text("Observer");
               }
           });
 
           socket.on("gameStart", (data) => {
+              console.log("recive GameStart");
               if(myColor==data.currentTurn){
                 isMyTurn=true;
               }
+              board=data.board;
+              dropableIndex=data.dropableIndexList;
+              console.log("boardState"+board);
+              console.log("dropable"+dropableIndex);
           });
          /* =====================================================  */
 
@@ -139,7 +211,7 @@
     <div>
       <label>Room</label><input id="roomName" type="text" value="10"/><button onclick="connectServer();">Enter</button>
     </div>
-    <div style="display:none">
+    <div style="display:">
       <canvas id="testCanvas" width="150" height="150"></canvas>
    	</div>
    	<div>

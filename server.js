@@ -11,39 +11,47 @@ app.set('view engine', 'ejs');
 app.engine('html', require('ejs').renderFile);
 
 //////////////////////////////////////////////////////////
-var firstTurn="black";
+var firstTurn=1;
 var listBoard=new Map();
 
 
 io.on('connection', (socket) => {
 
+
   console.log('a user connected');
+
 
   socket.on('roomEnter', (msg) => {
     //msg is roomName;
     socket.join(msg);
+
     var room = io.sockets.adapter.rooms[msg];
     console.log("room test :: "+room);
     var roomLength = room.length;
 
     var data;
     if(roomLength==1){
-        data={"userColor":"white"};
+        data={"userColor":1};
         socket.emit("roomEnter",data);
     }
     else if(roomLength==2){
-        data={"userColor":"black"};
+        data={"userColor":2};
         socket.emit("roomEnter",data);
 
     //game start send firstTurn;
         //create new board;
         listBoard.set(msg,createBoard());
+        let currentBoard=listBoard.get(msg);
+        let dropableIndexList=searchDropablePos(currentBoard,firstTurn);
 
-        data={"currentTurn":firstTurn};
+        data={"currentTurn":firstTurn,
+              "board":listBoard.get(msg),
+              "dropableIndexList":dropableIndexList};
+
         io.to(msg).emit("gameStart",data);
     }
     else {
-        data={"userColor":"none"};
+        data={"userColor":0};
         socket.emit("roomEnter",data);
     }
 
@@ -52,6 +60,7 @@ io.on('connection', (socket) => {
     console.log("room users Num : "+  roomLength);
 
   });
+
 
   socket.on('chatMsg', (data) => {
 
@@ -62,9 +71,15 @@ io.on('connection', (socket) => {
 
   });
 
+
   socket.on('dropStone', (data) => {
+
+      let currentBoard=listBoard.get(data.roomName);
+
+
       console.log("dropStone"+"x :"+data.pos.x+" y: "+data.pos.y);
   });
+
 
   socket.on('disconnect', () => {
   console.log('user disconnected');
@@ -86,28 +101,55 @@ io.on('connection', (socket) => {
 
   }
 
-  function searchDropablePos(board){
+  function searchDropablePos(board,dropStoneColor){
+
     var x=0;
     var y=0;
+    var dropablePosArr=[];
+
     for(var i=0; i<64; i++){
 
       x=Math.floor(i%8);
       y=Math.floor(i/8);
       console.log("searchPos"+"x::"+x+" y::"+y);
-      for(var j=0; j<8; j++){
-        var returnData=checkFullDirection(board,{"x":x,"y":y},i,1);
-        console.log(returnData.flag);
-        console.log(returnData.indexArr);
+
+      if(board[i]!=0){
+        console.log("!!!!!!!!!already dropStone::::"+board[i]);
+        continue;
       }
 
+      for(var j=0; j<8; j++){
+        var returnData=checkFullDirection(board,{"x":x,"y":y},j,dropStoneColor);
+
+        if(returnData.flag){
+          //if find dropablePos  push index and continue next index loof
+          dropablePosArr.push(i);
+          continue;
+          //console.log(returnData.indexArr);
+        }
+        //console.log(returnData.flag);
+        //console.log(returnData.indexArr);
+      }
 
     }
+
+    return dropablePosArr;
 
   }
   function dropStoneBoard(board,pos,dropColor){
+    var flipArr=[];
+
+    flipArr.push(pos.x+pos.y*8);
     for(var i=0; i<8; i++){
-      checkFullDirection(board,pos,i,dropColor);
+      var returnData;
+      returnData=checkFullDirection(board,pos,i,dropColor);
+      for(var j=0; j<returnData.indexArr.length; j++){
+        flipArr.push(returnData.indexArr[i]);
+      }
     }
+
+    console.log("flipIndex::"+flipArr);
+
   }
 
   function checkFullDirection(board,pos,direction,dropStoneColor){
@@ -115,7 +157,9 @@ io.on('connection', (socket) => {
     var flag=false;
     var currentPos=pos;
     var returnData={"flag":false,"indexArr":[]};
+
     while(true){
+
       switch (direction) {
         case 0:
           currentPos.x=currentPos.x+1;
@@ -146,6 +190,7 @@ io.on('connection', (socket) => {
           currentPos.y=currentPos.y+1;
           break;
       }
+      console.log("D::"+direction+",currentPos "+"X::"+currentPos.x+" Y::"+currentPos.y);
 
       if(currentPos.x>8||currentPos.x<0||currentPos.y<0||currentPos.y>8){
         returnData.flag=false;
@@ -167,6 +212,8 @@ io.on('connection', (socket) => {
             returnData.indexArr.push(index);
             //continu search next pos
             flag=true;
+
+            continue;
           }
 
       }
@@ -191,8 +238,11 @@ io.on('connection', (socket) => {
     }
 
   }
+//////////////////testCode
+  //searchDropablePos(createBoard(),1);
+  //dropStoneBoard(createBoard(),{"x":2,"y":4},1);
 
-  searchDropablePos(createBoard);
+
 //////////////////////////////////////////////////////////
 var server = app.listen(3000, function(){
     console.log("Express server has started on port 3000")
