@@ -161,12 +161,14 @@ io.on('connection', (socket) => {
     var flipArr=[];
 
     flipArr.push(pos.x+pos.y*8);
-
+    let x=pos.x;
+    let y=pos.y;
+  //  console.log("dropPos::"+"x::"+pos.x+" y::"+pos.y);
     for(var i=0; i<8; i++){
 
       var returnData;
-      returnData=checkFullDirection(board,pos,i,dropColor);
-
+      //returnData=checkFullDirection(board,pos,i,dropColor);
+        returnData=checkFullDirection(board,{"x":x,"y":y},i,dropColor);
       for(var j=0; j<returnData.indexArr.length; j++){
 
         flipArr.push(returnData.indexArr[j]);
@@ -186,7 +188,7 @@ io.on('connection', (socket) => {
     var flag=false;
     var currentPos=pos;
     var returnData={"flag":false,"indexArr":[]};
-
+    console.log("dropPos::"+"x::"+pos.x+" y::"+pos.y);
     while(true){
 
       switch (direction) {
@@ -220,9 +222,9 @@ io.on('connection', (socket) => {
           break;
       }
 
-      if(direction==1){
+
       console.log("D::"+direction+",currentPos "+"X::"+currentPos.x+" Y::"+currentPos.y);
-      }
+
 
       if(currentPos.x>8||currentPos.x<0||currentPos.y<0||currentPos.y>8){
         returnData.flag=false;
