@@ -75,9 +75,30 @@ io.on('connection', (socket) => {
   socket.on('dropStone', (data) => {
 
       let currentBoard=listBoard.get(data.roomName);
+      let flipStones=dropStoneBoard(currentBoard, data.pos, data.dropColor);
+
+      console.log("DropStone flipStrones::"+flipStones);
+
+      for(let i=0; i< flipStones.length; i++){
+        let index=flipStones[i];
+        currentBoard[index]=data.dropColor;
+      }
 
 
-      console.log("dropStone"+"x :"+data.pos.x+" y: "+data.pos.y);
+      let nextTurnColor=data.dropColor==1?2:1;
+      let nextDropables=searchDropablePos(currentBoard, nextTurnColor);
+
+      //listBoard.set(data.roomName,currentBoard);
+
+      console.log("currentTurn::"+nextTurnColor);
+      //  둘곳이 없을때 처리 추가필요
+      //
+      nextData={"board":currentBoard,
+                "dropableIndexList":nextDropables,
+                "currentTurn":nextTurnColor};
+
+      io.to(data.roomName).emit('dropStone',nextData);
+      //console.log("dropStone"+"x :"+data.pos.x+" y: "+data.pos.y);
   });
 
 
@@ -111,10 +132,10 @@ io.on('connection', (socket) => {
 
       x=Math.floor(i%8);
       y=Math.floor(i/8);
-      console.log("searchPos"+"x::"+x+" y::"+y);
+      //console.log("searchPos"+"x::"+x+" y::"+y);
 
       if(board[i]!=0){
-        console.log("!!!!!!!!!already dropStone::::"+board[i]);
+        //console.log("!!!!!!!!!already dropStone::::"+board[i]);
         continue;
       }
 
@@ -124,7 +145,7 @@ io.on('connection', (socket) => {
         if(returnData.flag){
           //if find dropablePos  push index and continue next index loof
           dropablePosArr.push(i);
-          continue;
+          break;
           //console.log(returnData.indexArr);
         }
         //console.log(returnData.flag);
@@ -140,15 +161,23 @@ io.on('connection', (socket) => {
     var flipArr=[];
 
     flipArr.push(pos.x+pos.y*8);
+
     for(var i=0; i<8; i++){
+
       var returnData;
       returnData=checkFullDirection(board,pos,i,dropColor);
+
       for(var j=0; j<returnData.indexArr.length; j++){
-        flipArr.push(returnData.indexArr[i]);
+
+        flipArr.push(returnData.indexArr[j]);
+        console.log("flip push:"+returnData.indexArr[j]);
       }
+
     }
 
-    console.log("flipIndex::"+flipArr);
+    //console.log("flipIndex::"+flipArr);
+    return flipArr;
+
 
   }
 
@@ -190,7 +219,10 @@ io.on('connection', (socket) => {
           currentPos.y=currentPos.y+1;
           break;
       }
+
+      if(direction==1){
       console.log("D::"+direction+",currentPos "+"X::"+currentPos.x+" Y::"+currentPos.y);
+      }
 
       if(currentPos.x>8||currentPos.x<0||currentPos.y<0||currentPos.y>8){
         returnData.flag=false;
@@ -198,6 +230,7 @@ io.on('connection', (socket) => {
       }
 
       index=currentPos.x+currentPos.y*8;
+
       var currentStoneColor=board[index];
 
       if(flag==false){ //before find diff color
@@ -227,6 +260,7 @@ io.on('connection', (socket) => {
           if(currentStoneColor!=dropStoneColor){
             //index push retur array
             returnData.indexArr.push(index);
+            continue;
           }
           else{
             returnData.flag=true;

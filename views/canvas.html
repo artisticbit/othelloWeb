@@ -10,9 +10,11 @@
     <script type="text/javascript">
         console.log("canvas Test");
 
-        var boardSize=800;
+        var boardSize=400;
         var ctx;
+        var canvas;
         var sepSize;
+
 
         var socket;
         var roomName;
@@ -33,7 +35,7 @@
 
             $('#testCanvas').attr("width",boardSize).attr('height',boardSize);
 
-            var canvas = document.getElementById("testCanvas");
+            canvas = document.getElementById("testCanvas");
             ctx = canvas.getContext('2d');
 
             sepSize=boardSize/8;
@@ -75,7 +77,7 @@
               drawY=Math.floor(i/8)*sepSize+sepSize/2;
 
               ctx.beginPath();
-              console.log(stoneColor);
+              //console.log(stoneColor);
               if(stoneColor==1){
                 ctx.fillStyle="rgb(255,255,255)";
               }
@@ -98,8 +100,18 @@
               //ctx.arc(event.x, event.y, 15, 0, Math.PI*2, true);
               //ctx.closePath();
               //ctx.fill();
+
+              //eventPos fix
+            var rect = canvas.getBoundingClientRect();
+            console.log("bounding left::"+rect.left+" top::"+rect.top);
+            console.log("before ePosx::"+event.x+" y::"+event.y);
+            var fixX= event.x-rect.left;
+            var fixY= event.y-rect.top;
+            //console.log("after ePosx::"+fixX+" y::"+fixY);
+
             if(isMyTurn){
-              var pos=checkPosition(event.x, event.y);
+              //var pos=checkPosition(event.x, event.y);
+              var pos=checkPosition(fixX, fixY); //event postion fix version
               let posIndex=pos.x+pos.y*8;
               let checkDropable=false;
 
@@ -142,7 +154,7 @@
 
         function connectServer(){
           console.log("connectServer");
-          socket = io.connect('http://127.0.0.1:3001');
+          socket = io.connect('http://192.168.0.36:3001');
 
         /* =====================================================  */
           socket.on("chatMsg", (data) => {
@@ -180,11 +192,34 @@
               if(myColor==data.currentTurn){
                 isMyTurn=true;
               }
+              else{
+                isMyTurn=false;
+              }
               board=data.board;
               dropableIndex=data.dropableIndexList;
               console.log("boardState"+board);
               console.log("dropable"+dropableIndex);
           });
+
+          socket.on("dropStone", (data) => {
+              console.log("recive dropStone");
+
+              if(myColor==data.currentTurn){
+                isMyTurn=true;
+              }
+              else{
+                isMyTurn=false;
+              }
+              board=data.board;
+              dropableIndex=data.dropableIndexList;
+              console.log("dropable::"+dropableIndex);
+
+              drawBoard(ctx,sepSize);
+
+              //console.log("boardState"+board);
+              //console.log("dropable"+dropableIndex);
+          });
+
          /* =====================================================  */
 
 
@@ -206,7 +241,8 @@
   </head>
   <body>
     <div>
-      <span>MY COLOR</span><span id="myColor"></span>
+      <span>MY COLOR::</span><span id="myColor"></span>
+      <span>Current Turn::</span><span id="currentTurn"></span>
     </div>
     <div>
       <label>Room</label><input id="roomName" type="text" value="10"/><button onclick="connectServer();">Enter</button>
