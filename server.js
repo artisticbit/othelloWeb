@@ -168,13 +168,14 @@ io.on('connection', (socket) => {
 
       var returnData;
       //returnData=checkFullDirection(board,pos,i,dropColor);
-        returnData=checkFullDirection(board,{"x":x,"y":y},i,dropColor);
-      for(var j=0; j<returnData.indexArr.length; j++){
+      returnData=checkFullDirection(board,{"x":x,"y":y},i,dropColor);
+      if(returnData.flag=true){
+        for(var j=0; j<returnData.indexArr.length; j++){
 
-        flipArr.push(returnData.indexArr[j]);
-        console.log("flip push:"+returnData.indexArr[j]);
+          flipArr.push(returnData.indexArr[j]);
+          console.log("flip push:"+returnData.indexArr[j]);
+        }
       }
-
     }
 
     //console.log("flipIndex::"+flipArr);

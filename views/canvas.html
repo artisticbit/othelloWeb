@@ -154,8 +154,8 @@
 
         function connectServer(){
           console.log("connectServer");
-          //socket = io.connect('http://192.168.0.36:3001');
-          socket = io.connect('localhost:3001');
+          socket = io.connect('http://192.168.0.36:3001');
+          //socket = io.connect('localhost:3001');
 
         /* =====================================================  */
           socket.on("chatMsg", (data) => {
@@ -198,6 +198,8 @@
               }
               board=data.board;
               dropableIndex=data.dropableIndexList;
+
+              turnCheck();
               console.log("boardState"+board);
               console.log("dropable"+dropableIndex);
           });
@@ -216,7 +218,7 @@
               console.log("dropable::"+dropableIndex);
 
               drawBoard(ctx,sepSize);
-
+              turnCheck();
               //console.log("boardState"+board);
               //console.log("dropable"+dropableIndex);
           });
@@ -238,13 +240,14 @@
         }
 
         function turnCheck(){
-          let turnDiv=$("#currentTurn");
+          var turnDiv = $("#currentTurn");
           if(isMyTurn){
-            trunDiv.text("My turn");
+            turnDiv.text("My turn");
           }
           else{
-            trunDiv.text("others turn");
+            turnDiv.text("others turn");
           }
+          console.log("turnCheck!!");
         }
 
 	</script>
