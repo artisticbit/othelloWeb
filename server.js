@@ -229,6 +229,7 @@ io.on('connection', (socket) => {
 
       if(currentPos.x>8||currentPos.x<0||currentPos.y<0||currentPos.y>8){
         returnData.flag=false;
+        returnData.indexArr=[];
         return returnData;
       }
 

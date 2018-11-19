@@ -31,6 +31,7 @@
         var dropableIndex;
 
 
+
         $(function(){
 
             $('#testCanvas').attr("width",boardSize).attr('height',boardSize);
@@ -154,8 +155,8 @@
 
         function connectServer(){
           console.log("connectServer");
-          socket = io.connect('http://192.168.0.36:3001');
-          //socket = io.connect('localhost:3001');
+          //socket = io.connect('http://192.168.0.36:3001');
+          socket = io.connect('localhost:3001');
 
         /* =====================================================  */
           socket.on("chatMsg", (data) => {
@@ -239,6 +240,16 @@
           socket.emit("chatMsg",data);
         }
 
+        function sendChatKeyEvent(event){
+          //console.log(event);
+
+          if(event.keyCode==13){
+            sendChatMsg();
+            var chatInput=$("#chatInput");
+            chatInput.val("");
+          }
+        }
+
         function turnCheck(){
           var turnDiv = $("#currentTurn");
           if(isMyTurn){
@@ -268,7 +279,7 @@
         <textarea id="chatView" cols="20" rows="4"></textarea>
       </div>
       <input type="text" id="chatNickName"/>
-      <input type="text" id="chatInput"/>
+      <input type="text" id="chatInput" onkeydown="sendChatKeyEvent(event)"/>
       <button id="chatSend" onclick="sendChatMsg();">send</button>
    	<div>
   </body>
