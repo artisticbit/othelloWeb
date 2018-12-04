@@ -9,8 +9,10 @@
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script type="text/javascript">
         console.log("canvas Test");
-
-        var boardSize=400;
+        var boardSize=0;
+        var lineNum=15;
+        var lineInterval=20;
+        var marginSize=20;
         var ctx;
         var canvas;
         var sepSize;
@@ -20,42 +22,41 @@
         var roomName;
         var myColor;
         var isMyTurn=false;
-        var board=[0,0,0,0,0,0,0,0,
-                   0,0,0,0,0,0,0,0,
-                   0,0,0,0,0,0,0,0,
-                   0,0,0,1,2,0,0,0,
-                   0,0,0,2,1,0,0,0,
-                   0,0,0,0,0,0,0,0,
-                   0,0,0,0,0,0,0,0,
-                   0,0,0,0,0,0,0,0];
+        var board=new Array();
         var dropableIndex;
 
 
 
         $(function(){
 
+            boardSize=lineInterval*(lineNum-1);
+
             $('#testCanvas').attr("width",boardSize).attr('height',boardSize);
 
             canvas = document.getElementById("testCanvas");
             ctx = canvas.getContext('2d');
 
-            sepSize=boardSize/8;
-            drawBoard(ctx,sepSize);
+            for(var i=0; i<lineNum*lineNum; i++){
+              board[i]=0;
+            }
+
+            drawBoard(ctx);
             canvas.onmousedown = function(event){ boardClickEvt(event)};
         });
 
-        function drawBoard(ctx,sepSize){
-            ctx.fillStyle="rgb(150,150,150)";
-            ctx.fillRect(0,0,boardSize,boardSize);
+        function drawBoard(ctx){
+
+            ctx.fillStyle="rgb(185,122,87)";
+            ctx.fillRect(0,0,boardSize+marginSize*2,boardSize+marginSize*2);
 
             //drawboard
             ctx.strokeStyle="rgb(0,0,0)";
             ctx.beginPath();
-            for(var i=0;i<8;i++){
-               ctx.moveTo(sepSize*i,0);
-               ctx.lineTo(sepSize*i,boardSize);
-               ctx.moveTo(0,sepSize*i);
-               ctx.lineTo(boardSize,sepSize*i);
+            for(var i=0;i<lineNum;i++){
+               ctx.moveTo(lineInterval*i+marginSize , marginSize);
+               ctx.lineTo(lineInterval*i+marginSize, boardSize+marginSize);
+               ctx.moveTo(marginSize , lineInterval*i+marginSize);
+               ctx.lineTo(boardSize+marginSize , lineInterval*i+marginSize);
             }
                ctx.closePath();
                ctx.stroke();
@@ -65,7 +66,7 @@
             var boardLength=board.length;
             let stoneColor=0;
             let drawX,drawY;
-            let radius=sepSize/2;
+            let radius=lineInterval/2;
             for(var i=0; i<boardLength; i++){
 
               stoneColor=board[i];
@@ -74,8 +75,8 @@
                 continue;
               }
 
-              drawX=Math.floor(i%8)*sepSize+sepSize/2;
-              drawY=Math.floor(i/8)*sepSize+sepSize/2;
+              drawX=Math.floor(i%lineNum)*lineInterval+marginSize;
+              drawY=Math.floor(i/lineNum)*lineInterval+marginSize;
 
               ctx.beginPath();
               //console.log(stoneColor);

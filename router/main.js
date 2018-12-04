@@ -16,4 +16,8 @@ module.exports = function(app)
         res.render('canvas.html');
     });
 
+    app.get('/omok',function(req,res){
+        res.render('omok.html');
+    });
+
 }
