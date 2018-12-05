@@ -146,8 +146,8 @@
               //posY=i%8;
               //console.log("x:"+posX+" y:"+posY);
           //}
-          posX=Math.floor(x/sepSize);
-          posY=Math.floor(y/sepSize);
+          posX=Math.floor((x-marginSize)/lineInterval);
+          posY=Math.floor((y-marginSize)/lineInterval);
 
           console.log("eventPos  "+"x: "+x +"y: "+y);
           console.log("intPos  "+"x: "+posX +"y: "+posY);
