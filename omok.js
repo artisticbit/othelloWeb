@@ -30,11 +30,10 @@ module.exports=function(io){
           //create new board;
           listBoard.set(msg,createBoard());
           let currentBoard=listBoard.get(msg);
-          let dropableIndexList=searchDropablePos(currentBoard,firstTurn);
+
 
           data={"currentTurn":firstTurn,
-                "board":listBoard.get(msg),
-                "dropableIndexList":dropableIndexList};
+                "board":listBoard.get(msg)};
 
           io.to(msg).emit("gameStart",data);
       }
@@ -63,18 +62,12 @@ module.exports=function(io){
     socket.on('dropStone', (data) => {
 
         let currentBoard=listBoard.get(data.roomName);
-        let flipStones=dropStoneBoard(currentBoard, data.pos, data.dropColor);
 
-        console.log("DropStone flipStrones::"+flipStones);
-
-        for(let i=0; i< flipStones.length; i++){
-          let index=flipStones[i];
-          currentBoard[index]=data.dropColor;
-        }
-
+        let posIndex=data.pos.x+data.pos.y*15;
+        currentBoard[posIndex]=data.dropColor;
+        console.log(currentBoard);
 
         let nextTurnColor=data.dropColor==1?2:1;
-        let nextDropables=searchDropablePos(currentBoard, nextTurnColor);
 
         //listBoard.set(data.roomName,currentBoard);
 
@@ -82,7 +75,6 @@ module.exports=function(io){
         //  둘곳이 없을때 처리 추가필요
         //
         nextData={"board":currentBoard,
-                  "dropableIndexList":nextDropables,
                   "currentTurn":nextTurnColor};
 
         io.to(data.roomName).emit('dropStone',nextData);
@@ -107,16 +99,11 @@ var listBoard=new Map();
 ////////////////////////gameManage//////////////////////////////////
 
   function createBoard(roomName){
-    var board=[0,0,0,0,0,0,0,0,
-               0,0,0,0,0,0,0,0,
-               0,0,0,0,0,0,0,0,
-               0,0,0,1,2,0,0,0,
-               0,0,0,2,1,0,0,0,
-               0,0,0,0,0,0,0,0,
-               0,0,0,0,0,0,0,0,
-               0,0,0,0,0,0,0,0];
+    var board=new Array();
+    for(var i=0; i<15*15; i++){
+      board[i]=0;
+    }
     return board;
-
   }
 
   function searchDropablePos(board,dropStoneColor){

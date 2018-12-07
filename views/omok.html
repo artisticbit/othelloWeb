@@ -105,30 +105,34 @@
 
               //eventPos fix
             var rect = canvas.getBoundingClientRect();
-            console.log("bounding left::"+rect.left+" top::"+rect.top);
-            console.log("before ePosx::"+event.x+" y::"+event.y);
+            //console.log("bounding left::"+rect.left+" top::"+rect.top);
+            //console.log("before ePosx::"+event.x+" y::"+event.y);
             var fixX= event.x-rect.left;
             var fixY= event.y-rect.top;
+
+            //test
+            //checkPosition(fixX,fixY);
+            //
             //console.log("after ePosx::"+fixX+" y::"+fixY);
 
             if(isMyTurn){
               //var pos=checkPosition(event.x, event.y);
               var pos=checkPosition(fixX, fixY); //event postion fix version
-              let posIndex=pos.x+pos.y*8;
+              let posIndex=pos.x+pos.y*15;
               let checkDropable=false;
 
-              for(let i=0; i<dropableIndex.length; i++){
-                if(posIndex==dropableIndex[i]){
+              console.log("currentPointColor::"+board[posIndex]);
+              if(board[posIndex]==0){
                   checkDropable=true;
-                  break;
-                }
               }
+
               if(checkDropable){
                 dropStone(pos);
               }
               else{
                 console.log("index::"+posIndex+"this pos not dropable");
               }
+
             }
         }
 
@@ -139,15 +143,34 @@
         }
 
         function checkPosition(x,y){
-          let posX,posY;
+          let posX=-1,posY=-1;
 
-          //for(var i=0; i<64; i++){
-              //posX=Math.floor(i/8);
-              //posY=i%8;
-              //console.log("x:"+posX+" y:"+posY);
-          //}
-          posX=Math.floor((x-marginSize)/lineInterval);
-          posY=Math.floor((y-marginSize)/lineInterval);
+          let flag =false;
+          for(var i=0; i<15; i++){ // X index
+              let pointX =  marginSize + lineInterval * i;
+
+              for(var j=0; j<15; j++){ // Y index
+                let pointY = marginSize + lineInterval * j;
+
+                let pointInterval =Math.sqrt(Math.pow((x - pointX),2)+Math.pow((y - pointY),2));
+
+                if(pointInterval<lineInterval/3){
+                  posX=i;
+                  posY=j;
+                  flag=true;
+                  //console.log("pointInterval ::"+pointInterval);
+                  break;
+                }
+
+                if(flag){
+                  break;
+                }
+              }
+
+
+          }
+          //posX=Math.floor((x-marginSize-(lineInterval/2))/lineInterval);
+          //posY=Math.floor((y-marginSize-(lineInterval/2))/lineInterval);
 
           console.log("eventPos  "+"x: "+x +"y: "+y);
           console.log("intPos  "+"x: "+posX +"y: "+posY);
@@ -199,11 +222,10 @@
                 isMyTurn=false;
               }
               board=data.board;
-              dropableIndex=data.dropableIndexList;
 
               turnCheck();
               console.log("boardState"+board);
-              console.log("dropable"+dropableIndex);
+
           });
 
           socket.on("dropStone", (data) => {
@@ -216,8 +238,6 @@
                 isMyTurn=false;
               }
               board=data.board;
-              dropableIndex=data.dropableIndexList;
-              console.log("dropable::"+dropableIndex);
 
               drawBoard(ctx,sepSize);
               turnCheck();
