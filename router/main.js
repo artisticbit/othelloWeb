@@ -20,4 +20,8 @@ module.exports = function(app)
         res.render('omok.html');
     });
 
+    app.get('/treejs',function(req,res){
+        res.render('treejs.html');
+    });
+
 }

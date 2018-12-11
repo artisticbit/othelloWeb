@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - loaders - 3DS loader</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				font-family: Monospace;
+				background-color: #000;
+				color: #fff;
+				margin: 0px;
+				overflow: hidden;
+			}
+			#info {
+				color: #fff;
+				position: absolute;
+				top: 10px;
+				width: 100%;
+				text-align: center;
+				z-index: 100;
+				display:block;
+			}
+			#info a, .button { color: #f00; font-weight: bold; text-decoration: underline; cursor: pointer }
+		</style>
+	</head>
+
+	<body>
+		<div id="info">
+
+		</div>
+
+		<script src="js/three.js"></script>
+		<script src="js/controls/TrackballControls.js"></script>
+		<script src="js/loaders/TDSLoader.js"></script>
+    <script src="js/loaders/OBJLoader.js"></script>
+    <script src="js/loaders/MTLLoader.js"></script>
+		<script>
+      var obj_parent;
+      var obj_s9;
+			var container, controls;
+			var camera, scene, renderer;
+			init();
+			animate();
+			function init() {
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 1000 );
+				camera.position.z = 100;
+				controls = new THREE.TrackballControls( camera );
+				scene = new THREE.Scene();
+        scene.background=new THREE.Color("rgb(150, 150, 150)");
+
+
+        console.log(scene.background);
+
+				scene.add( new THREE.HemisphereLight() );
+				var directionalLight = new THREE.DirectionalLight( 0xffeedd ,10);
+				directionalLight.position.set( 0, 0, -10 );
+        directionalLight.rotateX(Math.PI/2);
+        var helper = new THREE.DirectionalLightHelper( directionalLight, 5 );
+
+				scene.add( helper );
+
+        //3ds files dont store normal maps
+				var loader = new THREE.TextureLoader();
+			//	var normal = loader.load( '/3d/S9/tex/1-1F2152.jpg' );
+
+      	var loader = new THREE.TDSLoader( );
+
+				loader.setResourcePath( '3d/S9/tex/' );
+				loader.load( '3d/S9/S9.3ds', function ( object ) {
+					object.traverse( function ( child ) {
+						if ( child instanceof THREE.Mesh ) {
+					//		child.material.normalMap = normal;
+						}
+					} );
+          obj_s9=object;
+          obj_parent= new THREE.Object3D();
+          obj_parent.add(object);
+          obj_s9.rotateX(Math.PI/2);
+          obj_s9.position.set(0, 8, -1);
+
+					scene.add( obj_parent );
+				} );
+
+        loader.setResourcePath( '3d/S9/tex/' );
+        loader.load( '3d/S5/S5.3ds', function ( object ) {
+          object.traverse( function ( child ) {
+            if ( child instanceof THREE.Mesh ) {
+          //		child.material.normalMap = normal;
+            }
+          } );
+          object.position.set(10,50,0);
+          object.rotateX(-Math.PI/2);
+          scene.add( object );
+        } );
+
+
+
+
+				renderer = new THREE.WebGLRenderer({ antialias: true });
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+				window.addEventListener( 'resize', resize, false );
+			}
+			function resize() {
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+			}
+			function animate() {
+				controls.update();
+				renderer.render( scene, camera );
+				requestAnimationFrame( animate );
+			}
+
+      setInterval(function(){ obj_parent.rotateZ(Math.PI/100);
+                              obj_parent.rotateY(Math.PI/100);
+                              obj_parent.rotateX(Math.PI/100);}
+                                                            , 50);
+		</script>
+
+	</body>
+</html>
