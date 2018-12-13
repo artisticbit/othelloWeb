@@ -79,7 +79,12 @@ module.exports=function(io){
         io.to(data.roomName).emit('dropStone',nextData);
         //console.log("dropStone"+"x :"+data.pos.x+" y: "+data.pos.y);
         //종료판정
-        var checkFlag = checkLine(currentBoard,data.pos,data.dropColor);
+        var checkFlag = checkEnd(currentBoard,data.pos,data.dropColor);
+        if(checkFlag){
+          var endData={};
+          io.to(data.roomName).emit('endGame',endData);
+        }
+
     });
 
 
@@ -107,12 +112,26 @@ var listBoard=new Map();
     return board;
   }
 
-  function checkLine(currentBoard,dropPos,currentTurn){
+  function checkEnd(currentBoard,dropPos,dropColor){
 
-    for(let i=0; i<8; i++ ){
-      var currentX=dropPos.x;
-      var currentY=dropPos.y;
-        switch(i){
+    for(let i=0; i<8; i=i+2){
+      let sum=0;
+      sum=sum+checkLine(currentBoard,dropPos,dropColor,i);
+      sum=sum+checkLine(currentBoard,dropPos,dropColor,i+1);
+      if(sum>5){
+        return true;
+      }
+    }
+
+    }
+
+  function checkLine(currentBoard,dropPos,dropColor,direction){
+      let returnNum=0;
+      let currentX=dropPos.x;
+      let currentY=dropPos.y;
+      let currentIndex=0;
+      do{
+        switch(direction){
           case 0:
             currentX++;
             break;
@@ -143,10 +162,25 @@ var listBoard=new Map();
               break;
         }
 
-        
-    }
+        if(currentX>14 || currentX<0 || currentY>14 || currentY<0 ){
+          break;
+        }
 
+        currentIndex=currentX+currentY*15;
+        let currentColor=currentBoard[currentIndex];
+
+        if(currentColor==dropColor){
+          returnNum++;
+        }else{
+          break;
+        }
+
+      }while(true);
+
+      return returnNum;
   }
+
+
 
 //////////////////testCode
   //searchDropablePos(createBoard(),1);
