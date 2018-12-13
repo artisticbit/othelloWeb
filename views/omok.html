@@ -180,6 +180,7 @@
         function connectServer(){
           console.log("connectServer");
           socket = io.connect("http://"+window.location.hostname+':3002');
+          $("#enterBtn").attr("style",'display:none');
           //socket = io.connect('localhost:3001');
 
         /* =====================================================  */
@@ -245,6 +246,14 @@
               //console.log("dropable"+dropableIndex);
           });
 
+          socket.on("endGame", (data) => {
+              console.log("endGame");
+              isMyTurn=false;
+
+              var winner=data.winner==1?"흰돌":"검은돌";
+              ctx.font="50px 궁서";
+              ctx.fillText(winner+" 승리",40,80);
+          });
          /* =====================================================  */
 
 
@@ -287,10 +296,12 @@
   <body>
     <div>
       <span>MY COLOR::</span><span id="myColor"></span>
-      <span>Current Turn::</span><span id="currentTurn"></span>
     </div>
     <div>
-      <label>Room</label><input id="roomName" type="text" value="10"/><button onclick="connectServer();">Enter</button>
+        <span>Current Turn::</span><span id="currentTurn"></span>
+    </div>
+    <div>
+      <label>Room</label><input id="roomName" type="text" value="10"/><button id="enterBtn" onclick="connectServer();">Enter</button>
     </div>
     <div style="display:">
       <canvas id="testCanvas" width="150" height="150"></canvas>

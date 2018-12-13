@@ -65,7 +65,7 @@ module.exports=function(io){
 
         let posIndex=data.pos.x+data.pos.y*15;
         currentBoard[posIndex]=data.dropColor;
-        console.log(currentBoard);
+
 
         let nextTurnColor=data.dropColor==1?2:1;
 
@@ -81,7 +81,7 @@ module.exports=function(io){
         //종료판정
         var checkFlag = checkEnd(currentBoard,data.pos,data.dropColor);
         if(checkFlag){
-          var endData={};
+          var endData={"winner":data.dropColor};
           io.to(data.roomName).emit('endGame',endData);
         }
 
@@ -115,10 +115,12 @@ var listBoard=new Map();
   function checkEnd(currentBoard,dropPos,dropColor){
 
     for(let i=0; i<8; i=i+2){
-      let sum=0;
+      let sum=1;
       sum=sum+checkLine(currentBoard,dropPos,dropColor,i);
       sum=sum+checkLine(currentBoard,dropPos,dropColor,i+1);
-      if(sum>5){
+      console.log("current line sum::"+sum);
+      if(sum>4){
+        console.log("endGame");
         return true;
       }
     }
@@ -158,7 +160,7 @@ var listBoard=new Map();
               break;
           case 7:
             currentX--;
-            currentY--;
+            currentY++;
               break;
         }
 
