@@ -1,0 +1,286 @@
+<html>
+  <head>
+   	<meta charset="utf-8">
+   	<title>Socket</title>
+    	<style>
+
+    	</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        console.log("canvas Test");
+
+        var boardSize=400;
+        var ctx;
+        var canvas;
+        var sepSize;
+
+
+        var socket;
+        var roomName;
+        var myColor;
+        var isMyTurn=false;
+        var board=[0,0,0,0,0,0,0,0,
+                   0,0,0,0,0,0,0,0,
+                   0,0,0,0,0,0,0,0,
+                   0,0,0,1,2,0,0,0,
+                   0,0,0,2,1,0,0,0,
+                   0,0,0,0,0,0,0,0,
+                   0,0,0,0,0,0,0,0,
+                   0,0,0,0,0,0,0,0];
+        var dropableIndex;
+
+
+
+        $(function(){
+
+            $('#testCanvas').attr("width",boardSize).attr('height',boardSize);
+
+            canvas = document.getElementById("testCanvas");
+            ctx = canvas.getContext('2d');
+
+            sepSize=boardSize/8;
+            drawBoard(ctx,sepSize);
+            canvas.onmousedown = function(event){ boardClickEvt(event)};
+        });
+
+        function drawBoard(ctx,sepSize){
+            ctx.fillStyle="rgb(150,150,150)";
+            ctx.fillRect(0,0,boardSize,boardSize);
+
+            //drawboard
+            ctx.strokeStyle="rgb(0,0,0)";
+            ctx.beginPath();
+            for(var i=0;i<8;i++){
+               ctx.moveTo(sepSize*i,0);
+               ctx.lineTo(sepSize*i,boardSize);
+               ctx.moveTo(0,sepSize*i);
+               ctx.lineTo(boardSize,sepSize*i);
+            }
+               ctx.closePath();
+               ctx.stroke();
+
+            //drawStones
+            ctx.beginPath();
+            var boardLength=board.length;
+            let stoneColor=0;
+            let drawX,drawY;
+            let radius=sepSize/2;
+            for(var i=0; i<boardLength; i++){
+
+              stoneColor=board[i];
+
+              if(stoneColor==0){
+                continue;
+              }
+
+              drawX=Math.floor(i%8)*sepSize+sepSize/2;
+              drawY=Math.floor(i/8)*sepSize+sepSize/2;
+
+              ctx.beginPath();
+              //console.log(stoneColor);
+              if(stoneColor==1){
+                ctx.fillStyle="rgb(255,255,255)";
+              }
+              if(stoneColor==2){
+                ctx.fillStyle="rgb(0,0,0)";
+              }
+
+              ctx.arc(drawX, drawY, radius, 0, Math.PI*2, true);
+              ctx.fill();
+              ctx.closePath();
+
+            }
+
+
+        }
+
+        function boardClickEvt(event){
+              //ctx.beginPath();
+              //ctx.fillStyle="rgb(255,255,255)";
+              //ctx.arc(event.x, event.y, 15, 0, Math.PI*2, true);
+              //ctx.closePath();
+              //ctx.fill();
+
+              //eventPos fix
+            var rect = canvas.getBoundingClientRect();
+            console.log("bounding left::"+rect.left+" top::"+rect.top);
+            console.log("before ePosx::"+event.x+" y::"+event.y);
+            var fixX= event.x-rect.left;
+            var fixY= event.y-rect.top;
+            //console.log("after ePosx::"+fixX+" y::"+fixY);
+
+            if(isMyTurn){
+              //var pos=checkPosition(event.x, event.y);
+              var pos=checkPosition(fixX, fixY); //event postion fix version
+              let posIndex=pos.x+pos.y*8;
+              let checkDropable=false;
+
+              for(let i=0; i<dropableIndex.length; i++){
+                if(posIndex==dropableIndex[i]){
+                  checkDropable=true;
+                  break;
+                }
+              }
+              if(checkDropable){
+                dropStone(pos);
+              }
+              else{
+                console.log("index::"+posIndex+"this pos not dropable");
+              }
+            }
+        }
+
+        function dropStone(pos){
+          var data={"roomName":roomName,"pos":pos,"dropColor":myColor};
+
+          socket.emit("dropStone",data);
+        }
+
+        function checkPosition(x,y){
+          let posX,posY;
+
+          //for(var i=0; i<64; i++){
+              //posX=Math.floor(i/8);
+              //posY=i%8;
+              //console.log("x:"+posX+" y:"+posY);
+          //}
+          posX=Math.floor(x/sepSize);
+          posY=Math.floor(y/sepSize);
+
+          console.log("eventPos  "+"x: "+x +"y: "+y);
+          console.log("intPos  "+"x: "+posX +"y: "+posY);
+          return {"x":posX, "y":posY};
+        }
+
+        function connectServer(){
+          console.log("connectServer");
+          socket = io.connect('http://192.168.0.36:3001');
+          //socket = io.connect('localhost:3001');
+
+        /* =====================================================  */
+          socket.on("chatMsg", (data) => {
+
+            console.log(data);
+
+            var chatView=$("#chatView");
+            var viewVal=chatView.val();
+            var appendMsg=viewVal+"\n"+data.nickName+" : "+data.msg;
+
+            $("#chatView").val(appendMsg);
+
+            var top=chatView.prop("scrollHeight");
+            chatView.scrollTop(top);
+
+          });
+
+          socket.on("roomEnter", (data) => {
+              myColor=data.userColor;
+
+              if(myColor==1){
+                  $("#myColor").text("White");
+              }
+              if(myColor==2){
+                  $("#myColor").text("Black");
+              }
+
+              if(data.userColor==0){
+                $("#myColor").text("Observer");
+              }
+          });
+
+          socket.on("gameStart", (data) => {
+              console.log("recive GameStart");
+              if(myColor==data.currentTurn){
+                isMyTurn=true;
+              }
+              else{
+                isMyTurn=false;
+              }
+              board=data.board;
+              dropableIndex=data.dropableIndexList;
+
+              turnCheck();
+              console.log("boardState"+board);
+              console.log("dropable"+dropableIndex);
+          });
+
+          socket.on("dropStone", (data) => {
+              console.log("recive dropStone");
+
+              if(myColor==data.currentTurn){
+                isMyTurn=true;
+              }
+              else{
+                isMyTurn=false;
+              }
+              board=data.board;
+              dropableIndex=data.dropableIndexList;
+              console.log("dropable::"+dropableIndex);
+
+              drawBoard(ctx,sepSize);
+              turnCheck();
+              //console.log("boardState"+board);
+              //console.log("dropable"+dropableIndex);
+          });
+
+         /* =====================================================  */
+
+
+          roomName= $("#roomName").val();
+          socket.emit("roomEnter",roomName);
+
+        }
+
+        function sendChatMsg(){
+          var nickName=$("#chatNickName").val();
+          var chatMsg=$("#chatInput").val();
+          var data={"roomName":roomName, "nickName":nickName ,"msg":chatMsg};
+
+          socket.emit("chatMsg",data);
+        }
+
+        function sendChatKeyEvent(event){
+          //console.log(event);
+
+          if(event.keyCode==13){
+            sendChatMsg();
+            var chatInput=$("#chatInput");
+            chatInput.val("");
+          }
+        }
+
+        function turnCheck(){
+          var turnDiv = $("#currentTurn");
+          if(isMyTurn){
+            turnDiv.text("My turn");
+          }
+          else{
+            turnDiv.text("others turn");
+          }
+          console.log("turnCheck!!");
+        }
+
+	</script>
+  </head>
+  <body>
+    <div>
+      <span>MY COLOR::</span><span id="myColor"></span>
+      <span>Current Turn::</span><span id="currentTurn"></span>
+    </div>
+    <div>
+      <label>Room</label><input id="roomName" type="text" value="10"/><button onclick="connectServer();">Enter</button>
+    </div>
+    <div style="display:">
+      <canvas id="testCanvas" width="150" height="150"></canvas>
+   	</div>
+   	<div>
+      <div>
+        <textarea id="chatView" cols="20" rows="4"></textarea>
+      </div>
+      <input type="text" id="chatNickName"/>
+      <input type="text" id="chatInput" onkeydown="sendChatKeyEvent(event)"/>
+      <button id="chatSend" onclick="sendChatMsg();">send</button>
+   	<div>
+  </body>
+</html>

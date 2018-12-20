@@ -12,8 +12,8 @@ module.exports = function(app)
         res.render('socket.html');
     });
 
-    app.get('/canvas',function(req,res){
-        res.render('canvas.html');
+    app.get('/othello',function(req,res){
+        res.render('othello.html');
     });
 
     app.get('/omok',function(req,res){
@@ -22,6 +22,10 @@ module.exports = function(app)
 
     app.get('/treejs',function(req,res){
         res.render('treejs.html');
+    });
+
+    app.get('/threejs_obj',function(req,res){
+        res.render('threejs_obj.html');
     });
 
 }

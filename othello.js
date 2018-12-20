@@ -65,7 +65,7 @@ module.exports=function(io){
         let currentBoard=listBoard.get(data.roomName);
         let flipStones=dropStoneBoard(currentBoard, data.pos, data.dropColor);
 
-        console.log("DropStone flipStrones::"+flipStones);
+        //console.log("DropStone flipStrones::"+flipStones);
 
         for(let i=0; i< flipStones.length; i++){
           let index=flipStones[i];
@@ -80,6 +80,12 @@ module.exports=function(io){
 
         console.log("currentTurn::"+nextTurnColor);
         //  둘곳이 없을때 처리 추가필요
+        let enableLength=nextDropables.length;
+
+        if(enableLength<1){
+          nextTurnColor=data.dropColor==1?2:1;
+          nextDropables=searchDropablePos(currentBoard, nextTurnColor);
+        }
         //
         nextData={"board":currentBoard,
                   "dropableIndexList":nextDropables,
@@ -87,6 +93,11 @@ module.exports=function(io){
 
         io.to(data.roomName).emit('dropStone',nextData);
         //console.log("dropStone"+"x :"+data.pos.x+" y: "+data.pos.y);
+        //종료 판정
+        for(let i =0 ; i<currentBoard.length; i++){
+
+        }
+        //
     });
 
 
@@ -186,7 +197,7 @@ var listBoard=new Map();
     var flag=false;
     var currentPos=pos;
     var returnData={"flag":false,"indexArr":[]};
-    console.log("dropPos::"+"x::"+pos.x+" y::"+pos.y);
+    //console.log("dropPos::"+"x::"+pos.x+" y::"+pos.y);
     while(true){
 
       switch (direction) {
@@ -221,7 +232,7 @@ var listBoard=new Map();
       }
 
 
-      console.log("D::"+direction+",currentPos "+"X::"+currentPos.x+" Y::"+currentPos.y);
+      //console.log("D::"+direction+",currentPos "+"X::"+currentPos.x+" Y::"+currentPos.y);
 
 
       if(currentPos.x>8||currentPos.x<0||currentPos.y<0||currentPos.y>8){
