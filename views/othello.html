@@ -155,7 +155,7 @@
 
         function connectServer(){
           console.log("connectServer");
-          socket = io.connect('http://192.168.0.36:3001');
+          socket = io.connect("http://"+window.location.hostname+':3001');
           //socket = io.connect('localhost:3001');
 
         /* =====================================================  */

@@ -28,4 +28,7 @@ module.exports = function(app)
         res.render('threejs_obj.html');
     });
 
+    app.get('/test',function(req,res){
+        res.render('test.html');
+    });
 }

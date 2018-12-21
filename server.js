@@ -2,9 +2,11 @@ var express = require('express');
 var app = express();
 var router = require('./router/main') (app);
 
+
+
 var io = require('socket.io').listen(app.listen(3001));
 var io_omok = require('socket.io').listen(app.listen(3002));
-
+var io_test = require('socket.io').listen(app.listen(3003));
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
@@ -16,6 +18,10 @@ require('./othello.js')(io);
 
 //omok
 require('./omok.js')(io_omok);
+//
+require('./test.js')(io_test);
+//test
+
 //
 //////////////////////////////////////////////////////////
 var server = app.listen(3000, function(){
