@@ -224,6 +224,14 @@
               //console.log("dropable"+dropableIndex);
           });
 
+          socket.on("endGame", (data) => {
+              console.log("endGame");
+              isMyTurn=false;
+
+              var winner=data.winner==1?"흰돌":"검은돌";
+              ctx.font="50px 궁서";
+              ctx.fillText(winner+" 승리",40,80);
+          });
          /* =====================================================  */
 
 
