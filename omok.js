@@ -118,7 +118,7 @@ var listBoard=new Map();
       let sum=1;
       sum=sum+checkLine(currentBoard,dropPos,dropColor,i);
       sum=sum+checkLine(currentBoard,dropPos,dropColor,i+1);
-      console.log("current line sum::"+sum);
+      //console.log("current line sum::"+sum);
       if(sum>4){
         console.log("endGame");
         return true;

@@ -7,6 +7,7 @@ var router = require('./router/main') (app);
 var io = require('socket.io').listen(app.listen(3001));
 var io_omok = require('socket.io').listen(app.listen(3002));
 var io_test = require('socket.io').listen(app.listen(3003));
+var io_paint = require('socket.io').listen(app.listen(3004));
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
@@ -21,7 +22,9 @@ require('./omok.js')(io_omok);
 //
 require('./test.js')(io_test);
 //test
-
+//
+require('./paint.js')(io_paint);
+//
 //
 //////////////////////////////////////////////////////////
 var server = app.listen(3000, function(){

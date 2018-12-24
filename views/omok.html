@@ -310,9 +310,13 @@
       <div>
         <textarea id="chatView" cols="20" rows="4"></textarea>
       </div>
-      <input type="text" id="chatNickName"/>
-      <input type="text" id="chatInput" onkeydown="sendChatKeyEvent(event)"/>
+      <div>
+      <span>nickName</span><input type="text" id="chatNickName"/>
+      </div>
+      <div>
+      <span>Chat</span><input type="text" id="chatInput" onkeydown="sendChatKeyEvent(event)"/>
       <button id="chatSend" onclick="sendChatMsg();">send</button>
+      </div>
    	<div>
   </body>
 </html>

@@ -1,0 +1,146 @@
+<html>
+  <head>
+   	<meta charset="utf-8">
+   	<title>Socket</title>
+    	<style>
+
+    	</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="js/matter.js"></script>
+
+    <script type="text/javascript">
+
+      var ctx;
+      var canvas;
+      var drawFlag=false;
+
+      const WIDTH=300;
+      const HEIGHT=300;
+
+      $(function(){
+
+        $('#testCanvas').attr("width",WIDTH).attr('height',HEIGHT);
+
+        canvas = document.getElementById("testCanvas");
+        ctx = canvas.getContext('2d');
+
+        ctx.lineWidth=3;
+        ctx.lintJoin='round';
+        ctx.lineCap='round';
+        ctx.strokeStyle="#555";
+        canvas.onmousedown = mouseDownEvent;
+        canvas.onmousemove= mouseMoveEvent;
+        canvas.onmouseup= mouseUpEvent;
+      });
+
+
+
+      function mouseDownEvent(e){
+        var pos = fixMousePos({"x":e.x,"y":e.y});
+        drawFlag=true;
+        ctx.beginPath();
+        ctx.moveTo(pos.x,pos.y);
+
+      }
+      function mouseMoveEvent(e){
+
+        if(drawFlag){
+          var pos = fixMousePos({"x":e.x,"y":e.y});
+          ctx.lineTo(pos.x,pos.y);
+          ctx.stroke();
+        }
+
+
+      }
+      function mouseUpEvent(){
+        drawFlag =false;
+
+        var imageData=ctx.getImageData(0,0,WIDTH,HEIGHT);
+        var data= imageData.data;
+      //  sendCanvas(data);
+        sendCanvas(imageData);
+      }
+
+      function fixMousePos(pos){
+        var rect = canvas.getBoundingClientRect();
+        var fixX= event.x-rect.left;
+        var fixY= event.y-rect.top;
+
+        return {
+                "x" : fixX,
+                "y" : fixY
+        }
+      }
+
+
+    </script>
+
+    <script type="text/javascript">
+
+      var socket;
+      var roomName;
+
+
+      function connectServer(){
+        console.log("connect Server");
+        socket = io.connect("http://"+window.location.hostname+':3004');
+
+        roomName= $("#roomName").val();
+        socket.emit("roomEnter",roomName);
+
+        socket.on("canvasData",data=>{
+          //var imageData=ctx.getImageData(0,0,WIDTH,HEIGHT);
+          //imageData.data=data.canvasData;
+          var imageData= data.imageData;
+          //ctx.putImageData(data.imageData,0,0);
+          console.log("reciveCanvas");
+          console.log("canvasData::"+imageData);
+          for(key in imageData){
+            console.log(key);
+          }
+          console.log("imgjson::"+data.imgjson);
+
+        });
+
+      }
+      ////
+      function sendCanvas(imageData){
+        var data={
+          'roomName' : roomName,
+          'NickName' : "testUser",
+          'imageData' : imageData,
+          'imgjson': JSON.stringify(imageData)
+        };
+        socket.emit("canvasData",data);
+        console.log("sendCanvas");
+        console.log(data.imageData);
+      }
+
+    </script>
+
+
+  </head>
+  <body>
+    <div>
+      <span>MY COLOR::</span><span id="myColor"></span>
+    </div>
+    <div>
+        <span>Current Turn::</span><span id="currentTurn"></span>
+    </div>
+    <div>
+      <label>Room</label><input id="roomName" type="text" value="10"/><button id="enterBtn" onclick="connectServer();">Enter</button>
+    </div>
+    <div style="display:">
+      <canvas id="testCanvas" width="150" height="150"></canvas>
+   	</div>
+   	<div>
+      <div>
+        <textarea id="chatView" cols="20" rows="4"></textarea>
+      </div>
+      <input type="text" id="chatNickName"/>
+      <input type="text" id="chatInput" onkeydown="sendChatKeyEvent(event)"/>
+      <button id="chatSend" onclick="sendChatMsg();">send</button>
+   	<div>
+  </body>
+</html>

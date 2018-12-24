@@ -94,9 +94,15 @@ module.exports=function(io){
         io.to(data.roomName).emit('dropStone',nextData);
         //console.log("dropStone"+"x :"+data.pos.x+" y: "+data.pos.y);
         //종료 판정
+        var endFlag=true;
         for(let i =0 ; i<currentBoard.length; i++){
-          var endData={"winner":data.dropColor};
-          io.to(data.roomName).emit('endGame',endData);
+          if(currentBoard[i]==0){
+            endFlag=false;
+          }
+        }
+        if(endFlag){
+        var endData={"winner":data.dropColor};
+        io.to(data.roomName).emit('endGame',endData);
         }
         //
     });
