@@ -94,6 +94,7 @@ module.exports=function(io){
         io.to(data.roomName).emit('dropStone',nextData);
         //console.log("dropStone"+"x :"+data.pos.x+" y: "+data.pos.y);
         //종료 판정
+        //checkEndGame();
         var endFlag=true;
         for(let i =0 ; i<currentBoard.length; i++){
           if(currentBoard[i]==0){
@@ -101,7 +102,13 @@ module.exports=function(io){
           }
         }
         if(endFlag){
-        var endData={"winner":data.dropColor};
+          var whiteCount=0;
+          var blackCount=0;
+          for(let i =0 ; i<currentBoard.length; i++){
+            currentBoard==1?whiteCount++:blackCount++;
+          }
+          var winnerColor=whiteCount>blackCount?1:2;
+        var endData={"winner":winnerColor};
         io.to(data.roomName).emit('endGame',endData);
         }
         //
@@ -289,6 +296,10 @@ var listBoard=new Map();
 
 
     }
+
+  }
+
+  function checkEndGame(){
 
   }
 //////////////////testCode
