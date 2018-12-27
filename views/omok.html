@@ -24,8 +24,7 @@
         var isMyTurn=false;
         var board=new Array();
         var dropableIndex;
-
-
+        var doubleThreeFlag=false;
 
         $(function(){
 
@@ -246,6 +245,18 @@
               //console.log("dropable"+dropableIndex);
           });
 
+          socket.on("doubleThree", (data)=>{
+            console.log("!!!!!!!33!!!!!!!!")
+            ctx.font="50px 궁서";
+            ctx.fillText(data.message,40,80);
+            doubleThreeFlag=true;
+            setTimeout(function(){
+              doubleThreeFlag=false;
+              drawBoard(ctx,sepSize);
+            },2000);
+
+          });
+
           socket.on("endGame", (data) => {
               console.log("endGame");
               isMyTurn=false;
@@ -288,7 +299,7 @@
           else{
             turnDiv.text("others turn");
           }
-          console.log("turnCheck!!");
+          //console.log("turnCheck!!");
         }
 
 	</script>
