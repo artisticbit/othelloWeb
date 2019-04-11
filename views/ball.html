@@ -20,6 +20,11 @@
       const HEIGHT=400;
 
       var ball = new ballObj();
+
+      function ballObj(){
+        this.x = 100;
+        this.y= 100;
+      }
       console.log(ball.x + ball.y);
 
       $(function(){
@@ -33,9 +38,7 @@
         ctx.lintJoin='round';
         ctx.lineCap='round';
         ctx.strokeStyle="#555";
-        canvas.onmousedown = mouseDownEvent;
-        canvas.onmousemove= mouseMoveEvent;
-        canvas.onmouseup= mouseUpEvent;
+
       });
 
       $(function(){
@@ -45,29 +48,14 @@
       });
 
       function mouseDownEvent(e){
-        var pos = fixMousePos({"x":e.x,"y":e.y});
-        drawFlag=true;
-        ctx.beginPath();
-        ctx.moveTo(pos.x,pos.y);
+
 
       }
       function mouseMoveEvent(e){
 
-        if(drawFlag){
-          var pos = fixMousePos({"x":e.x,"y":e.y});
-          ctx.lineTo(pos.x,pos.y);
-          ctx.stroke();
-        }
-
-
       }
       function mouseUpEvent(){
-        drawFlag =false;
 
-        var imageData=ctx.getImageData(0,0,WIDTH,HEIGHT);
-        var data= imageData.data;
-      //  sendCanvas(data);
-        sendCanvas(imageData);
       }
 
       function fixMousePos(pos){
@@ -81,26 +69,9 @@
         }
       }
 
-      function changeBrush(){
-        console.log($(this).val());
-        var brushValue=$(this).val();
-        if(brushValue=='normal'){
-          ctx.lineWidth=3;
-          ctx.lintJoin='round';
-          ctx.lineCap='round';
-          ctx.strokeStyle="#555555";
-        }
-        else if(brushValue=='eraser'){
-          ctx.lineWidth=6;
-          ctx.strokeStyle="#FFFFFF";
-        }
 
-      }
 
-      function ballObj(){
-        this.x = 100;
-        this.y= 100;
-      }
+
     </script>
 
     <script type="text/javascript">
@@ -111,7 +82,7 @@
 
       function connectServer(){
         console.log("connect Server");
-        socket = io.connect("http://"+window.location.hostname+':3004');
+        socket = io.connect("http://"+window.location.hostname+':3005');
 
         roomName= $("#roomName").val();
         socket.emit("roomEnter",roomName);
