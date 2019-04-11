@@ -36,5 +36,9 @@ module.exports = function(app)
         res.render('test.html');
     });
 
+    app.get('/ball',function(req,res){
+        res.render('ball.html');
+    });
+
 
 }

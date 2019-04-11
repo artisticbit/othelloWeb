@@ -19,6 +19,9 @@
       const WIDTH=400;
       const HEIGHT=400;
 
+      var ball = new ballObj();
+      console.log(ball.x + ball.y);
+
       $(function(){
 
         $('#testCanvas').attr("width",WIDTH).attr('height',HEIGHT);
@@ -94,6 +97,10 @@
 
       }
 
+      function ballObj(){
+        this.x = 100;
+        this.y= 100;
+      }
     </script>
 
     <script type="text/javascript">
