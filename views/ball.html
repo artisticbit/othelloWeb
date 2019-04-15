@@ -7,8 +7,8 @@
     	</style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-    <script src="js/matter.js"></script>
-
+    <script src="js/phaser.js"></script>
+    <script src="js/airhockey/main.js"></script>
     <script type="text/javascript">
 
       var ctx;
@@ -25,7 +25,7 @@
         this.x = 100;
         this.y= 100;
       }
-      console.log(ball.x + ball.y);
+
 
       $(function(){
 
@@ -43,20 +43,9 @@
 
       $(function(){
         $('#testCanvas').css("border","solid 2px");
-        $('[name="brush"]').on("change",changeBrush);
 
       });
 
-      function mouseDownEvent(e){
-
-
-      }
-      function mouseMoveEvent(e){
-
-      }
-      function mouseUpEvent(){
-
-      }
 
       function fixMousePos(pos){
         var rect = canvas.getBoundingClientRect();
@@ -79,7 +68,6 @@
       var socket;
       var roomName;
 
-
       function connectServer(){
         console.log("connect Server");
         socket = io.connect("http://"+window.location.hostname+':3005');
@@ -88,18 +76,10 @@
         socket.emit("roomEnter",roomName);
 
         socket.on("canvasData",data=>{
-          //var imageData=ctx.getImageData(0,0,WIDTH,HEIGHT);
-          //imageData.data=data.canvasData;
           var imageData= data.imageData;
-          //ctx.putImageData(data.imageData,0,0);
-          console.log("reciveCanvas");
-          //console.log("canvasData::"+imageData);
-          for(key in imageData){
-            //console.log(key);
-          }
-        //  console.log("imgjson::"+data.imgjson);
 
-          //drwa data
+          console.log("reciveCanvas");
+
           for(var y=0; y<HEIGHT; y++){
             for(var x=0; x<WIDTH; x++){
               var pos=y*WIDTH+x;
@@ -111,11 +91,11 @@
             }
 
           }
-          //
+
         });
 
       }
-      ////
+ 
       function sendCanvas(imageData){
         var data={
           'roomName' : roomName,
@@ -146,9 +126,7 @@
     <div>
       <label>Room</label><input id="roomName" type="text" value="10"/><button id="enterBtn" onclick="connectServer();">Enter</button>
     </div>
-    <div>
-      <input type="radio" name="brush" value="normal">pen <input type="radio" name="brush" value="eraser">eraser
-    </div>
+
     <div style="display:">
       <canvas id="testCanvas" width="150" height="150"></canvas>
    	</div>
