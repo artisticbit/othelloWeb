@@ -40,5 +40,7 @@ module.exports = function(app)
         res.render('ball.html');
     });
 
-
+    app.get('/rps',function(req,res){
+        res.render('rps.html');
+    });
 }

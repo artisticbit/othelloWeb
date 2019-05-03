@@ -1,0 +1,181 @@
+<html>
+  <head>
+   	<meta charset="utf-8">
+   	<title>rps</title>
+    	<style>
+
+    	</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+
+      var ctx;
+      var canvas;
+      var drawFlag=false;
+      var drawMode=1;
+
+      const WIDTH=400;
+      const HEIGHT=400;
+
+      $(function(){
+
+
+      });
+
+    </script>
+
+    <script type="text/javascript">
+
+      var socket;
+      var roomName;
+
+
+      function connectServer(){
+        console.log("connect Server");
+        socket = io.connect("http://"+window.location.hostname+':3006');
+
+        $("#chatNickName").attr("readonly","true");
+        $("#enterBtn").css("display","none");
+        var nickName=$("#chatNickName").val();
+        roomName= $("#roomName").val();
+        var data={"roomName" : roomName , "nickName" : nickName};
+        socket.emit("roomEnter",data);
+
+        socket.on("chatMsg", (data) => {
+
+          console.log(data);
+
+          var chatView=$("#chatView");
+          var viewVal=chatView.val();
+          var appendMsg=viewVal+"\n"+data.nickName+" : "+data.msg;
+
+          $("#chatView").val(appendMsg);
+
+          var top=chatView.prop("scrollHeight");
+          chatView.scrollTop(top);
+
+        });
+
+        socket.on("gameStart",(data)=>{
+          $("#inputDiv").css("display","");
+          $("#startBtn").css("display","none");
+          console.log("gameStart");
+        });
+        socket.on("endStart",(data)=>{
+          $("#inputDiv").css("display","none");
+          $("#startBtn").css("display","");
+          var chatView=$("#chatView");
+          var viewVal=chatView.val();
+          
+          var appendMsg=viewVal+"\n=======결과========";
+
+          if(data.result=="draw"){
+              appendMsg=appendMsg+"\n무승부";
+          }else{
+            var winner=[];
+            var loser=[];
+            for(let i=0;i<data.userList.length;i++){
+              console.log(data.userList[i].result);
+              if(data.userList[i].result=="win")
+                winner.push(data.userList[i].nickName);
+              else
+                loser.push(data.userList[i].nickName);
+            }
+            appendMsg=appendMsg+"\n!!!!승리자!!!!\n"+winner.join(",");
+            appendMsg=appendMsg+"\n!!!!패배자!!!!\n"+loser.join(",");
+            chatView.val(appendMsg);
+          }
+
+        });
+
+
+      }
+      ////
+      function sendChatMsg(){
+          var nickName=$("#chatNickName").val();
+          var chatMsg=$("#chatInput").val();
+          var data={"roomName":roomName, "nickName":nickName ,"msg":chatMsg};
+
+          socket.emit("chatMsg",data);
+        }
+
+        function sendChatKeyEvent(event){
+          //console.log(event);
+
+          if(event.keyCode==13){
+            sendChatMsg();
+            var chatInput=$("#chatInput");
+            chatInput.val("");
+          }
+        }
+
+        function sendGameStart(){
+          console.log("start");
+
+          var nickName=$("#chatNickName").val();
+          var chatMsg=$("#chatInput").val();
+          var data={"roomName":roomName, "nickName":nickName};
+
+          socket.emit("gameStart",data);
+
+        }
+
+        function sendRPS(type){
+          console.log(type);
+          $("#inputDiv").css("display","none");
+          var nickName=$("#chatNickName").val();
+          var chatMsg=$("#chatInput").val();
+          var data={"roomName":roomName, "nickName":nickName, "type" : type};
+
+          socket.emit("sendRPS",data);
+
+        }
+
+        
+    </script>
+
+
+  </head>
+  <body>
+    <div>
+      <!--
+      <span>MY COLOR::</span><span id="myColor"></span>
+      -->
+
+    </div>
+    <div>
+        <!--
+        <span>Current Turn::</span><span id="currentTurn"></span>
+      -->
+    </div>
+    <div>
+      <label>UserName</label><input type="text" id="chatNickName"/>
+    </div>
+    <div>
+      <label>Room</label><input id="roomName" type="text" value="10"/><button id="enterBtn" onclick="connectServer();">Enter</button>
+    </div>
+    <div style="display:none">
+      <canvas id="testCanvas" width="150" height="150"></canvas>
+   	</div>
+   	<div>
+      <div>
+        <textarea id="chatView" cols="40" rows="10"></textarea>
+      </div>
+      <input type="text" id="chatInput" onkeydown="sendChatKeyEvent(event)"/>
+      <button id="chatSend" onclick="sendChatMsg();">send</button>
+      <button id="startBtn" onclick="sendGameStart()">가위바위보 시작</button>
+      <div id="inputDiv" style="display: none">
+        <button id="send_s" onclick="sendRPS(0)" style="background: transparent">
+          <img src="image/rps/s.png" width="50px" height="50px"/>
+        </button>
+        <button id="send_r" onclick="sendRPS(1)" style="background: transparent">
+            <img src="image/rps/r.png" width="50px" height="50px"/>
+        </button>
+        <button id="send_p" onclick="sendRPS(2)" style="background: transparent">
+            <img src="image/rps/p.png" width="50px" height="50px"/>
+        </button>
+      </div>
+   	<div>
+  </body>
+</html>

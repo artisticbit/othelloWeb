@@ -9,6 +9,7 @@ var io_omok = require('socket.io').listen(app.listen(3002));
 var io_test = require('socket.io').listen(app.listen(3003));
 var io_paint = require('socket.io').listen(app.listen(3004));
 var io_ball = require('socket.io').listen(app.listen(3005));
+var io_rps = require('socket.io').listen(app.listen(3006));
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
@@ -29,6 +30,7 @@ require('./paint.js')(io_paint);
 //
 require('./ball.js')(io_ball);
 //
+require('./rps.js')(io_rps);
 //////////////////////////////////////////////////////////
 var server = app.listen(3000, function(){
     console.log("Express server has started on port 3000")
